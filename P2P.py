@@ -1,14 +1,12 @@
-# P2P.py
-import time
 import streamlit as st
+st.set_page_config(page_title="Prompt to Profit (P2P)", page_icon="💼", layout="wide")
+
+import time
 from content import ROUNDS
 from scoring import score_prompt, interpret_kpis
 from db import init_db, add_leaderboard, get_end_now, get_start_now
 
-st.set_page_config(page_title="Prompt to Profit (P2P)", page_icon="💼", layout="wide")
-init_db()
-
-st.set_page_config(page_title="Prompt to Profit (P2P)", page_icon="💼", layout="wide")
+# Initialize database first (after Streamlit config)
 init_db()
 
 def _init_state():
@@ -23,6 +21,7 @@ def _init_state():
     ss.setdefault("prompt_text", "")
     ss.setdefault("_last_tick", time.time())
     ss.setdefault("needs_rerun", False)
+
 
 _init_state()
 
