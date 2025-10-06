@@ -1,4 +1,4 @@
-# db.py
+# db.py  (replace file)
 import sqlite3
 import threading
 from typing import List, Dict, Any, Optional
@@ -24,9 +24,7 @@ def _ensure_row(conn):
     """)
 
 def migrate_db():
-    """Create tables if missing and add missing columns safely."""
     with _lock, _connect() as conn:
-        # leaderboard
         conn.execute("""
         CREATE TABLE IF NOT EXISTS leaderboard (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,14 +33,7 @@ def migrate_db():
           createdAt TEXT NOT NULL
         );
         """)
-
-        # game_state (create minimal, then add columns as needed)
-        conn.execute("""
-        CREATE TABLE IF NOT EXISTS game_state (
-          id INTEGER PRIMARY KEY CHECK (id=1)
-        );
-        """)
-
+        conn.execute("""CREATE TABLE IF NOT EXISTS game_state (id INTEGER PRIMARY KEY CHECK (id=1));""")
         cols = _columns(conn, "game_state")
         if "admin_code_hash" not in cols:
             conn.execute("ALTER TABLE game_state ADD COLUMN admin_code_hash TEXT;")
@@ -52,10 +43,7 @@ def migrate_db():
             conn.execute("ALTER TABLE game_state ADD COLUMN end_now INTEGER DEFAULT 0;")
         if "updatedAt" not in cols:
             conn.execute("ALTER TABLE game_state ADD COLUMN updatedAt TEXT;")
-
         _ensure_row(conn)
-
-        # Set default admin code if empty
         row = conn.execute("SELECT admin_code_hash FROM game_state WHERE id=1").fetchone()
         if row and (row["admin_code_hash"] is None):
             conn.execute(
@@ -100,6 +88,10 @@ def add_leaderboard(player: str, score: int):
             "INSERT INTO leaderboard (playerName, totalScore, createdAt) VALUES (?, ?, datetime('now'))",
             (player, score)
         )
+
+def wipe_leaderboard():
+    with _lock, _connect() as conn:
+        conn.execute("DELETE FROM leaderboard;")
 
 def top10() -> List[Dict[str, Any]]:
     with _lock, _connect() as conn:

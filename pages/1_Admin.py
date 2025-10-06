@@ -1,11 +1,11 @@
-# pages/1_Admin.py
+# pages/1_Admin.py  (replace file)
 import streamlit as st
 from db import (
     init_db, top10, standings,
     set_end_now, get_end_now,
     set_admin_code_hash, get_admin_code_hash,
     set_start_now, get_start_now,
-    migrate_db
+    migrate_db, wipe_leaderboard
 )
 from utils import hash_code, check_code
 
@@ -45,7 +45,7 @@ with st.expander("Admin Security", expanded=True):
                     set_admin_code_hash(hash_code(new_code.strip()))
                     st.success("Admin code saved.")
 
-# ---- Start / End controls (require code, never reveal) ----
+# ---- Start / End controls ----
 st.subheader("Start / End Game")
 start_flag = get_start_now()
 end_flag = get_end_now()
@@ -97,3 +97,16 @@ if st.button("Migrate/Repair DB"):
         st.success("Database migrated/repaired successfully.")
     except Exception as e:
         st.error(f"Migration failed: {e}")
+
+with st.expander("Danger Zone: Wipe Leaderboard"):
+    st.write("This permanently deletes all leaderboard entries.")
+    code = st.text_input("Enter admin code to confirm", type="password", key="wipe_code")
+    confirm = st.text_input('Type **WIPE** to confirm', key="wipe_text")
+    if st.button("Wipe Leaderboard"):
+        if not (confirm.strip().upper() == "WIPE"):
+            st.error("Type WIPE to confirm.")
+        elif not check_code(code.strip(), get_admin_code_hash()):
+            st.error("Invalid admin code.")
+        else:
+            wipe_leaderboard()
+            st.success("Leaderboard wiped.")
