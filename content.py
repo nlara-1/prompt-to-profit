@@ -6,13 +6,14 @@ Dept = Literal["Finance", "Marketing", "Management", "Business Analytics"]
 class Choice(TypedDict):
     key: str
     text: str
-    kpi_effects: Dict[str, int]  # KPI-specific changes
+    kpi_effects: Dict[str, int]
 
 class Round(TypedDict):
     id: int
     department: Dept
     scenario: str
     objective: str
+    priority: str  # which KPI is most important
     choices: List[Choice]
 
 
@@ -21,25 +22,26 @@ ROUNDS: List[Round] = [
         "id": 1,
         "department": "Marketing",
         "scenario": (
-            "You’ve joined a local coffee shop’s marketing team. Sales are steady, but social media engagement is low. "
-            "The owners want to use AI to refresh their content strategy without losing their warm, neighborhood tone."
+            "Your campus coffee shop just launched a rewards app, but student downloads are slow. "
+            "The manager wants quick growth before finals week when students will spend more."
         ),
-        "objective": "Use AI to create an authentic campaign that balances creativity, brand consistency, and reach.",
+        "objective": "Use AI to design a campaign that drives engagement without harming the brand image.",
+        "priority": "revenue",
         "choices": [
             {
                 "key": "A",
-                "text": "Ask AI to analyze customer comments and write friendly captions that reflect real community stories.",
-                "kpi_effects": {"revenue": 4, "efficiency": 3, "reputation": 4, "innovation": 2},
+                "text": "Ask AI to analyze existing customers and create personalized deals to boost short-term sales.",
+                "kpi_effects": {"revenue": 6, "efficiency": 4, "reputation": 2, "innovation": 1},
             },
             {
                 "key": "B",
-                "text": "Ask AI to create bold, edgy posts using trending audio to go viral quickly.",
-                "kpi_effects": {"revenue": 6, "efficiency": 2, "reputation": 1, "innovation": 4},
+                "text": "Ask AI to design a viral challenge on social media around sustainability and reusable cups.",
+                "kpi_effects": {"revenue": 3, "efficiency": 2, "reputation": 5, "innovation": 5},
             },
             {
                 "key": "C",
-                "text": "Ask AI to design consistent but plain posts that focus on clear product information only.",
-                "kpi_effects": {"revenue": 2, "efficiency": 5, "reputation": 3, "innovation": 0},
+                "text": "Ask AI to build a survey to better understand why students haven’t downloaded the app yet.",
+                "kpi_effects": {"revenue": 2, "efficiency": 3, "reputation": 4, "innovation": 2},
             },
         ],
     },
@@ -47,25 +49,26 @@ ROUNDS: List[Round] = [
         "id": 2,
         "department": "Finance",
         "scenario": (
-            "You’re interning for a student-run meal delivery startup struggling to manage cash flow. "
-            "They want AI to forecast spending but are unsure whether to focus on precision, creativity, or speed."
+            "You’re interning at a startup that’s struggling to manage cash flow after a new product launch. "
+            "The CFO wants a clear forecast before presenting to investors next week."
         ),
-        "objective": "Use AI to generate a financial forecast that’s accurate, useful, and adaptable.",
+        "objective": "Use AI to forecast next quarter’s cash position while balancing speed and accuracy.",
+        "priority": "efficiency",
         "choices": [
             {
                 "key": "A",
-                "text": "Ask AI to model future cash flow using the last 6 months of data and project 3 scenarios: best, base, and worst case.",
-                "kpi_effects": {"revenue": 5, "efficiency": 4, "reputation": 3, "innovation": 2},
+                "text": "Use AI to generate three financial models (best, base, worst) from historical spending data.",
+                "kpi_effects": {"revenue": 5, "efficiency": 5, "reputation": 4, "innovation": 2},
             },
             {
                 "key": "B",
-                "text": "Ask AI to propose a new forecasting method using unconventional metrics like delivery time or social media sentiment.",
-                "kpi_effects": {"revenue": 2, "efficiency": 1, "reputation": 2, "innovation": 6},
+                "text": "Ask AI to include alternative data like customer sentiment and delivery times to refine projections.",
+                "kpi_effects": {"revenue": 3, "efficiency": 2, "reputation": 3, "innovation": 6},
             },
             {
                 "key": "C",
-                "text": "Ask AI to summarize all expenses and income into a simple table without predictions or insights.",
-                "kpi_effects": {"revenue": 1, "efficiency": 6, "reputation": 3, "innovation": 0},
+                "text": "Ask AI to simplify the report into visuals with quick key takeaways for investor readability.",
+                "kpi_effects": {"revenue": 4, "efficiency": 6, "reputation": 5, "innovation": 1},
             },
         ],
     },
@@ -73,25 +76,26 @@ ROUNDS: List[Round] = [
         "id": 3,
         "department": "Management",
         "scenario": (
-            "Your student org is preparing for its annual leadership summit. Deadlines are slipping and communication is messy. "
-            "You decide to try an AI productivity assistant — but your teammates have mixed feelings about using it."
+            "Your student consulting group is falling behind on deliverables. "
+            "The president asks you to use AI tools to organize project tasks and communication."
         ),
-        "objective": "Use AI to improve accountability and collaboration without making things feel robotic.",
+        "objective": "Use AI to restore accountability without making your team feel micromanaged.",
+        "priority": "reputation",
         "choices": [
             {
                 "key": "A",
-                "text": "Ask AI to track tasks and automatically message team members when deadlines are approaching.",
-                "kpi_effects": {"revenue": 2, "efficiency": 5, "reputation": 2, "innovation": 1},
+                "text": "Ask AI to track deliverables and send automated reminders before deadlines.",
+                "kpi_effects": {"revenue": 2, "efficiency": 5, "reputation": 3, "innovation": 1},
             },
             {
                 "key": "B",
-                "text": "Ask AI to create a collaborative dashboard summarizing team progress and highlighting key wins weekly.",
-                "kpi_effects": {"revenue": 3, "efficiency": 4, "reputation": 5, "innovation": 3},
+                "text": "Ask AI to build a dashboard showing task ownership, progress trends, and weekly highlights.",
+                "kpi_effects": {"revenue": 3, "efficiency": 4, "reputation": 6, "innovation": 3},
             },
             {
                 "key": "C",
-                "text": "Ask AI to write motivational messages and reflection prompts for team meetings.",
-                "kpi_effects": {"revenue": 0, "efficiency": 2, "reputation": 4, "innovation": 4},
+                "text": "Ask AI to analyze team mood and generate motivational summaries after meetings.",
+                "kpi_effects": {"revenue": 1, "efficiency": 2, "reputation": 5, "innovation": 5},
             },
         ],
     },
@@ -99,24 +103,25 @@ ROUNDS: List[Round] = [
         "id": 4,
         "department": "Business Analytics",
         "scenario": (
-            "You’re working on a class project with a retail company. They can’t predict which products sell out fastest. "
-            "You’ll use AI to find sales trends and help them plan inventory smarter."
+            "A retail chain wants to predict which products will run out before holiday season. "
+            "Your job is to use AI insights to help them avoid stockouts without over-ordering inventory."
         ),
-        "objective": "Leverage AI to find meaningful insights from messy data that improve stock management.",
+        "objective": "Use AI to create a balanced forecast that improves inventory accuracy.",
+        "priority": "revenue",
         "choices": [
             {
                 "key": "A",
-                "text": "Ask AI to clean and analyze 12 months of sales data, finding trends by season and product type.",
+                "text": "Ask AI to analyze 12 months of sales data by region, price, and product category.",
                 "kpi_effects": {"revenue": 6, "efficiency": 5, "reputation": 3, "innovation": 2},
             },
             {
                 "key": "B",
-                "text": "Ask AI to find unusual buying patterns, even if the method is experimental or less tested.",
+                "text": "Ask AI to search for unusual buying spikes using external factors like weather and campus events.",
                 "kpi_effects": {"revenue": 3, "efficiency": 2, "reputation": 3, "innovation": 6},
             },
             {
                 "key": "C",
-                "text": "Ask AI to build visual dashboards summarizing data for executives to interpret manually.",
+                "text": "Ask AI to summarize data into visual dashboards for store managers to interpret manually.",
                 "kpi_effects": {"revenue": 2, "efficiency": 4, "reputation": 5, "innovation": 1},
             },
         ],
@@ -125,24 +130,25 @@ ROUNDS: List[Round] = [
         "id": 5,
         "department": "Marketing",
         "scenario": (
-            "Your college is launching a workshop on AI in Business, and you’re responsible for promoting it. "
-            "You’ll use AI to create content that attracts students from different majors."
+            "You’re leading promotions for your university’s first AI in Business Summit. "
+            "The dean expects full attendance, but student interest seems low so far."
         ),
-        "objective": "Generate creative yet credible outreach posts to maximize workshop attendance.",
+        "objective": "Use AI to boost event attendance while keeping messaging professional.",
+        "priority": "innovation",
         "choices": [
             {
                 "key": "A",
-                "text": "Ask AI to craft one message per major (business, STEM, arts) that emphasizes real career benefits.",
-                "kpi_effects": {"revenue": 5, "efficiency": 3, "reputation": 5, "innovation": 3},
+                "text": "Ask AI to write targeted LinkedIn-style posts featuring career benefits of attending.",
+                "kpi_effects": {"revenue": 4, "efficiency": 4, "reputation": 6, "innovation": 2},
             },
             {
                 "key": "B",
-                "text": "Ask AI to generate a viral-style meme campaign connecting AI to everyday student life.",
-                "kpi_effects": {"revenue": 2, "efficiency": 2, "reputation": 2, "innovation": 7},
+                "text": "Ask AI to create a student-focused meme campaign connecting AI to campus life humor.",
+                "kpi_effects": {"revenue": 3, "efficiency": 3, "reputation": 3, "innovation": 7},
             },
             {
                 "key": "C",
-                "text": "Ask AI to create a short, professional flyer focusing on key event details and times.",
+                "text": "Ask AI to design one clean promotional email summarizing event details and RSVP info.",
                 "kpi_effects": {"revenue": 4, "efficiency": 6, "reputation": 4, "innovation": 1},
             },
         ],
