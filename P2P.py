@@ -8,6 +8,9 @@ from db import init_db, add_leaderboard, get_end_now, get_start_now
 st.set_page_config(page_title="Prompt to Profit (P2P)", page_icon="💼", layout="wide")
 init_db()
 
+st.set_page_config(page_title="Prompt to Profit (P2P)", page_icon="💼", layout="wide")
+init_db()
+
 def _init_state():
     ss = st.session_state
     ss.setdefault("joined", False)
@@ -18,11 +21,13 @@ def _init_state():
     ss.setdefault("assistant_msg", "")
     ss.setdefault("round_submitted", False)
     ss.setdefault("prompt_text", "")
-    ss.setdefault("_last_tick", 0.0)
+    ss.setdefault("_last_tick", time.time())
+    ss.setdefault("needs_rerun", False)
 
 _init_state()
 
 TOTAL_SECONDS = 20 * 60
+
 def seconds_left():
     spent = int(time.time() - st.session_state._last_tick)
     return max(0, TOTAL_SECONDS - spent)
@@ -35,8 +40,7 @@ def reset_game(keep_name=True):
         st.session_state.player_name = name
         st.session_state.joined = True
 
-
-# Header
+# --- HEADER ---
 left, right = st.columns([2, 1])
 with left:
     st.title("Prompt to Profit (P2P)")
@@ -44,33 +48,34 @@ with left:
 with right:
     started = get_start_now() == 1
     ended = get_end_now() == 1
+
+    if started and st.session_state._last_tick == 0:
+        st.session_state._last_tick = time.time()
+
     tl = seconds_left() if started and not ended else TOTAL_SECONDS
     st.metric("⏱ Time Left", f"{tl//60:02d}:{tl%60:02d}")
     st.metric("Total Score", st.session_state.score)
 
 st.divider()
 
-# Join flow
+# --- JOIN FLOW ---
 if not st.session_state.joined:
     st.subheader("Join the Game")
-    st.session_state.player_name = st.text_input("Enter your name", max_chars=32)
+    name_input = st.text_input("Enter your name", value=st.session_state.player_name, max_chars=32)
     if st.button("Join"):
-        if st.session_state.player_name.strip():
+        if name_input.strip():
+            st.session_state.player_name = name_input.strip()
             st.session_state.joined = True
-            st.success(f"Welcome, {st.session_state.player_name}!")
-            st.rerun()
+            st.session_state.needs_rerun = True
         else:
             st.error("Please enter a name.")
     st.stop()
 
-if get_start_now() == 0 and get_end_now() == 0:
-    st.info("Waiting for the admin to start the game…")
-    st.button("Refresh", on_click=lambda: st.rerun())
-    st.stop()
+# trigger rerun cleanly
+if st.session_state.get("needs_rerun", False):
+    st.session_state.needs_rerun = False
+    st.rerun()
 
-if get_end_now() == 1:
-    st.warning("The admin has ended the game.")
-    st.stop()
 
 # Gameplay
 if st.session_state.round_index < len(ROUNDS):
