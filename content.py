@@ -6,7 +6,7 @@ Dept = Literal["Finance", "Marketing", "Management", "Business Analytics"]
 class Choice(TypedDict):
     key: str
     text: str
-    presetScore: int
+    kpi_effects: Dict[str, int]  # KPI-specific changes
 
 class Round(TypedDict):
     id: int
@@ -14,7 +14,6 @@ class Round(TypedDict):
     scenario: str
     objective: str
     choices: List[Choice]
-    weights: Dict[str, float]
 
 
 ROUNDS: List[Round] = [
@@ -22,96 +21,130 @@ ROUNDS: List[Round] = [
         "id": 1,
         "department": "Marketing",
         "scenario": (
-            "You’ve joined a university project helping a small coffee shop compete against national chains. "
-            "The owners noticed their social media posts barely get any interaction, and they’re losing younger customers. "
-            "They want you to use AI to improve their online presence while keeping their local, friendly image intact."
+            "You’ve joined a local coffee shop’s marketing team. Sales are steady, but social media engagement is low. "
+            "The owners want to use AI to refresh their content strategy without losing their warm, neighborhood tone."
         ),
-        "objective": "Use an AI writing tool to design a social media strategy that increases engagement without losing authenticity.",
+        "objective": "Use AI to create an authentic campaign that balances creativity, brand consistency, and reach.",
         "choices": [
-            {"key": "A", "text": "Ask the AI to study past posts and write new captions that emphasize the shop’s community feel while testing different post times.", "presetScore": 7},
-            {"key": "B", "text": "Ask the AI to create short posts using trending memes to quickly boost likes and shares.", "presetScore": 3},
-            {"key": "C", "text": "Ask the AI to write long, formal posts describing every menu item in detail to appear more professional.", "presetScore": 1},
+            {
+                "key": "A",
+                "text": "Ask AI to analyze customer comments and write friendly captions that reflect real community stories.",
+                "kpi_effects": {"revenue": 4, "efficiency": 3, "reputation": 4, "innovation": 2},
+            },
+            {
+                "key": "B",
+                "text": "Ask AI to create bold, edgy posts using trending audio to go viral quickly.",
+                "kpi_effects": {"revenue": 6, "efficiency": 2, "reputation": 1, "innovation": 4},
+            },
+            {
+                "key": "C",
+                "text": "Ask AI to design consistent but plain posts that focus on clear product information only.",
+                "kpi_effects": {"revenue": 2, "efficiency": 5, "reputation": 3, "innovation": 0},
+            },
         ],
-        "weights": {"revenue": 0.3, "efficiency": 0.3, "reputation": 0.3, "innovation": 0.1},
     },
     {
         "id": 2,
         "department": "Finance",
         "scenario": (
-            "You’re interning at a student-run startup that delivers meal kits to dorms. "
-            "Cash flow has been tight, and the founders aren’t sure how much money they’ll have left for marketing next month. "
-            "They’re tracking everything in spreadsheets but have no forecasting method."
+            "You’re interning for a student-run meal delivery startup struggling to manage cash flow. "
+            "They want AI to forecast spending but are unsure whether to focus on precision, creativity, or speed."
         ),
-        "objective": "Use AI to analyze their spending and project cash flow for the next quarter to guide smarter budgeting.",
+        "objective": "Use AI to generate a financial forecast that’s accurate, useful, and adaptable.",
         "choices": [
-            {"key": "A", "text": "Ask the AI to summarize income and expenses, find cost patterns, and simulate how different marketing budgets impact profit.", "presetScore": 7},
-            {"key": "B", "text": "Tell the AI to predict profits assuming sales double every month.", "presetScore": 1},
-            {"key": "C", "text": "Ask the AI to list transactions from the past month without analyzing trends.", "presetScore": 3},
+            {
+                "key": "A",
+                "text": "Ask AI to model future cash flow using the last 6 months of data and project 3 scenarios: best, base, and worst case.",
+                "kpi_effects": {"revenue": 5, "efficiency": 4, "reputation": 3, "innovation": 2},
+            },
+            {
+                "key": "B",
+                "text": "Ask AI to propose a new forecasting method using unconventional metrics like delivery time or social media sentiment.",
+                "kpi_effects": {"revenue": 2, "efficiency": 1, "reputation": 2, "innovation": 6},
+            },
+            {
+                "key": "C",
+                "text": "Ask AI to summarize all expenses and income into a simple table without predictions or insights.",
+                "kpi_effects": {"revenue": 1, "efficiency": 6, "reputation": 3, "innovation": 0},
+            },
         ],
-        "weights": {"revenue": 0.4, "efficiency": 0.4, "reputation": 0.1, "innovation": 0.1},
     },
     {
         "id": 3,
         "department": "Management",
         "scenario": (
-            "Your student organization is hosting its biggest event of the year, but half the team is behind schedule. "
-            "You’re considering using an AI assistant to organize deadlines and communication. "
-            "Some members worry it might make things too formal or robotic."
+            "Your student org is preparing for its annual leadership summit. Deadlines are slipping and communication is messy. "
+            "You decide to try an AI productivity assistant — but your teammates have mixed feelings about using it."
         ),
-        "objective": "Use AI to improve coordination and accountability while keeping communication personal and motivating.",
+        "objective": "Use AI to improve accountability and collaboration without making things feel robotic.",
         "choices": [
-            {"key": "A", "text": "Ask the AI to summarize each member’s progress, identify blockers, and remind people of upcoming deadlines respectfully.", "presetScore": 7},
-            {"key": "B", "text": "Ask the AI to send automatic daily alerts for every unfinished task, no matter how small.", "presetScore": 3},
-            {"key": "C", "text": "Ask the AI to draft motivational messages each week without tracking actual work progress.", "presetScore": 2},
+            {
+                "key": "A",
+                "text": "Ask AI to track tasks and automatically message team members when deadlines are approaching.",
+                "kpi_effects": {"revenue": 2, "efficiency": 5, "reputation": 2, "innovation": 1},
+            },
+            {
+                "key": "B",
+                "text": "Ask AI to create a collaborative dashboard summarizing team progress and highlighting key wins weekly.",
+                "kpi_effects": {"revenue": 3, "efficiency": 4, "reputation": 5, "innovation": 3},
+            },
+            {
+                "key": "C",
+                "text": "Ask AI to write motivational messages and reflection prompts for team meetings.",
+                "kpi_effects": {"revenue": 0, "efficiency": 2, "reputation": 4, "innovation": 4},
+            },
         ],
-        "weights": {"revenue": 0.1, "efficiency": 0.5, "reputation": 0.2, "innovation": 0.2},
     },
     {
         "id": 4,
         "department": "Business Analytics",
         "scenario": (
-            "Your class is working with a regional clothing brand that can’t predict which products will sell out. "
-            "They’ve collected tons of data but don’t know how to use it effectively. "
-            "You’re tasked with showing how AI can turn raw data into smarter inventory decisions."
+            "You’re working on a class project with a retail company. They can’t predict which products sell out fastest. "
+            "You’ll use AI to find sales trends and help them plan inventory smarter."
         ),
-        "objective": "Use AI to analyze sales data and recommend which items to restock next season.",
+        "objective": "Leverage AI to find meaningful insights from messy data that improve stock management.",
         "choices": [
-            {"key": "A", "text": "Ask the AI to group sales data by item category, compare seasonal trends, and suggest which items to restock.", "presetScore": 7},
-            {"key": "B", "text": "Ask the AI to create a colorful graph of sales totals without context or recommendations.", "presetScore": 3},
-            {"key": "C", "text": "Ask the AI to estimate future demand using only average sales numbers from one month.", "presetScore": 2},
+            {
+                "key": "A",
+                "text": "Ask AI to clean and analyze 12 months of sales data, finding trends by season and product type.",
+                "kpi_effects": {"revenue": 6, "efficiency": 5, "reputation": 3, "innovation": 2},
+            },
+            {
+                "key": "B",
+                "text": "Ask AI to find unusual buying patterns, even if the method is experimental or less tested.",
+                "kpi_effects": {"revenue": 3, "efficiency": 2, "reputation": 3, "innovation": 6},
+            },
+            {
+                "key": "C",
+                "text": "Ask AI to build visual dashboards summarizing data for executives to interpret manually.",
+                "kpi_effects": {"revenue": 2, "efficiency": 4, "reputation": 5, "innovation": 1},
+            },
         ],
-        "weights": {"revenue": 0.3, "efficiency": 0.4, "reputation": 0.2, "innovation": 0.1},
     },
     {
         "id": 5,
         "department": "Marketing",
         "scenario": (
-            "Your university’s business department is launching an AI in Business workshop, and they want help promoting it. "
-            "The goal is to attract students from all majors, not just business. "
-            "They’ve asked you to test whether AI can write creative but professional outreach messages."
+            "Your college is launching a workshop on AI in Business, and you’re responsible for promoting it. "
+            "You’ll use AI to create content that attracts students from different majors."
         ),
-        "objective": "Use AI to write an engaging announcement that gets students to sign up without overhyping the event.",
+        "objective": "Generate creative yet credible outreach posts to maximize workshop attendance.",
         "choices": [
-            {"key": "A", "text": "Ask the AI to write three short announcements tailored to different audiences (STEM, Arts, Business) with unique benefits for each.", "presetScore": 7},
-            {"key": "B", "text": "Ask the AI to write one post filled with industry buzzwords like 'revolutionary' and 'game-changing'.", "presetScore": 2},
-            {"key": "C", "text": "Ask the AI to write a long paragraph explaining the history of AI with no clear call-to-action.", "presetScore": 3},
+            {
+                "key": "A",
+                "text": "Ask AI to craft one message per major (business, STEM, arts) that emphasizes real career benefits.",
+                "kpi_effects": {"revenue": 5, "efficiency": 3, "reputation": 5, "innovation": 3},
+            },
+            {
+                "key": "B",
+                "text": "Ask AI to generate a viral-style meme campaign connecting AI to everyday student life.",
+                "kpi_effects": {"revenue": 2, "efficiency": 2, "reputation": 2, "innovation": 7},
+            },
+            {
+                "key": "C",
+                "text": "Ask AI to create a short, professional flyer focusing on key event details and times.",
+                "kpi_effects": {"revenue": 4, "efficiency": 6, "reputation": 4, "innovation": 1},
+            },
         ],
-        "weights": {"revenue": 0.2, "efficiency": 0.3, "reputation": 0.3, "innovation": 0.2},
-    },
-    {
-        "id": 6,
-        "department": "Management",
-        "scenario": (
-            "You’re consulting for a nonprofit that’s struggling to keep track of project results. "
-            "The team wants to learn from mistakes but lacks time to review reports from past initiatives. "
-            "They’ve asked you to experiment with using AI for knowledge sharing."
-        ),
-        "objective": "Use AI to summarize lessons from past projects and create insights the team can use for planning.",
-        "choices": [
-            {"key": "A", "text": "Ask the AI to summarize past reports, list successes and failures, and provide three improvement ideas.", "presetScore": 7},
-            {"key": "B", "text": "Ask the AI to create a single summary of results without recommendations.", "presetScore": 3},
-            {"key": "C", "text": "Ask the AI to make a client list and completion dates for quick reference only.", "presetScore": 2},
-        ],
-        "weights": {"revenue": 0.1, "efficiency": 0.3, "reputation": 0.3, "innovation": 0.3},
     },
 ]
