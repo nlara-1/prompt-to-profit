@@ -1,76 +1,76 @@
 # scoring.py
 import re
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple, List
 
-ScoreBreakdown = Dict[str, int]
-
-def score_prompt(text: str) -> Tuple[int, ScoreBreakdown, bool, List[str]]:
-    lc = text.lower()
-    bd: ScoreBreakdown = {"specificity":0, "data":0, "constraints":0, "ethics":0, "kpi":0}
-    tips: List[str] = []
+def score_prompt(p: str) -> Tuple[int, Dict[str, int], bool, List[str], str]:
+    """Return (total_score, breakdown, hard_fail, tips, explanation)."""
+    text = p.lower()
+    breakdown = {"specificity": 0, "clarity": 0, "ethics": 0, "kpi": 0, "tone": 0}
+    tips = []
+    explanation_parts = []
 
     # Specificity
-    if re.search(r"\b(top|3|three)\b.*\bissues?\b", lc) or re.search(r"\bexamples?\b", lc) or "json" in lc:
-        bd["specificity"] = 2
-    elif re.search(r"\b(improve|analyze|optimize|forecast|summarize)\b", lc):
-        bd["specificity"] = 0
+    if any(w in text for w in ["month", "data", "analyze", "trend", "report", "summary"]):
+        breakdown["specificity"] = 2
+        explanation_parts.append("Your prompt included specific data or time details.")
+    elif "any" in text or "whatever" in text:
+        breakdown["specificity"] = -2
+        tips.append("Be specific about what data or examples the AI should use.")
+        explanation_parts.append("It was too vague and lacked clear direction.")
     else:
-        bd["specificity"] = -2
+        breakdown["specificity"] = 0
 
-    # Data anchoring
-    if re.search(r"\b(last|past)\s+\d+\s+(weeks|months|quarters|years)\b", lc) or "by sku" in lc:
-        bd["data"] = 2
-    elif "data" in lc:
-        bd["data"] = 0
-    elif re.search(r"\bpublic|scrape\b", lc):
-        bd["data"] = -2
-        tips.append("Anchor to owned/authorized data, not scraping.")
+    # Clarity / structure
+    if any(w in text for w in ["limit", "short", "3", "three", "list", "bullets", "format"]):
+        breakdown["clarity"] = 2
+        explanation_parts.append("It gave clear structure or limits to the response.")
     else:
-        bd["data"] = 0
+        breakdown["clarity"] = 0
 
-    # Constraints / format
-    if re.search(r"\bmax\s*\d+\s*(words|chars)\b", lc) or any(x in lc for x in ["json","table","bullet","bullets"]) or re.search(r"\bescalat(e|ion)\b", lc):
-        bd["constraints"] = 2
-    elif re.search(r"do whatever it takes|as much as possible", lc):
-        bd["constraints"] = -2
-        tips.append("Add clear format and guardrails.")
+    # Ethics / safety
+    if "personal data" in text or "avoid bias" in text or "inclusive" in text:
+        breakdown["ethics"] = 2
+        explanation_parts.append("It showed awareness of ethics or inclusivity.")
+    elif "leak" in text or "private" in text or "hack" in text:
+        breakdown["ethics"] = -2
+        tips.append("Avoid risky or unethical requests.")
+        explanation_parts.append("It risked unethical or unsafe behavior.")
     else:
-        bd["constraints"] = 0
+        breakdown["ethics"] = 0
 
-    # Ethics/compliance
-    if re.search(r"\bexclude\b.*\bpii\b", lc) or "anonymize" in lc or re.search(r"\bbias(ed)?-?free\b", lc):
-        bd["ethics"] = 2
-    elif re.search(r"scrape customer emails|use competitor internal data|young", lc):
-        bd["ethics"] = -2
-        tips.append("Avoid risky, biased, or non-compliant instructions.")
+    # KPI / goal alignment
+    if any(w in text for w in ["goal", "improve", "increase", "reduce", "boost", "target"]):
+        breakdown["kpi"] = 2
+        explanation_parts.append("It connected to measurable goals or outcomes.")
     else:
-        bd["ethics"] = 0
+        breakdown["kpi"] = 0
+        tips.append("Tie your prompt to a measurable outcome or goal.")
 
-    # KPI alignment (no abbreviations)
-    if re.search(r"\b(customer satisfaction|average handle time|click[- ]through rate|return on investment|root mean square error|confidence interval|80%|net present value|return on assets|return on equity|customer acquisition cost|lifetime value)\b", lc):
-        bd["kpi"] = 2
-    elif "viral" in lc:
-        bd["kpi"] = -2
-        tips.append("Tie prompts to measurable business KPIs.")
+    # Tone / professionalism
+    if any(w in text for w in ["friendly", "clear", "professional", "inclusive", "positive"]):
+        breakdown["tone"] = 2
+        explanation_parts.append("It used a positive and professional tone.")
+    elif any(w in text for w in ["aggressive", "spam", "boring"]):
+        breakdown["tone"] = -2
+        tips.append("Keep the tone professional and friendly.")
+        explanation_parts.append("The tone seemed off or too informal.")
     else:
-        bd["kpi"] = 0
+        breakdown["tone"] = 0
 
-    total = sum(bd.values())
+    total = sum(breakdown.values())
     total = max(-10, min(10, total))
-    hard_fail = (total == -10)
+    hard_fail = total <= -8
 
     if hard_fail:
-        tips = ["try again"]
-    elif total < 0 and not tips:
-        tips.append("Add time range for data, clear output format, and explicit KPI targets.")
+        tips.insert(0, "try again")
 
-    return total, bd, hard_fail, tips
+    explanation = " ".join(explanation_parts) if explanation_parts else "Rowdy didn’t detect much direction in that prompt."
+    return total, breakdown, hard_fail, tips, explanation
 
 
 def kpi_delta(score: int, weights: Dict[str, float]) -> Dict[str, int]:
-    return {
-        "revenue": round(score * weights["revenue"]),
-        "efficiency": round(score * weights["efficiency"]),
-        "reputation": round(score * weights["reputation"]),
-        "innovation": round(score * weights["innovation"]),
-    }
+    """Convert score to KPI impacts."""
+    delta = {}
+    for k, w in weights.items():
+        delta[k] = round(score * w)
+    return delta

@@ -136,7 +136,7 @@ if (time_left > 0) and in_rounds:
             if not st.session_state.round_submitted:
                 used_text = st.session_state.prompt_text.strip()
                 total, _, hard_fail, tips = score_prompt(used_text)
-                msg = "try again" if hard_fail else ("Nice work!" if total >= 0 and not tips else f"Suggestions: {' · '.join(tips)}")
+                msg = ("try again" if hard_fail else f"You scored {total} points. Rowdy says: {explanation}")
                 delta = kpi_delta(total, round_obj["weights"])
                 apply(total, delta, msg, hard_fail)
                 st.rerun()
@@ -158,7 +158,7 @@ if (time_left > 0) and in_rounds:
     m2.metric("Efficiency", st.session_state.kpis["efficiency"])
     m3.metric("Reputation", st.session_state.kpis["reputation"])
     m4.metric("Innovation", st.session_state.kpis["innovation"])
-    st.info(f"**AI Assistant**: {st.session_state.assistant_msg or 'Waiting for your prompt…'}")
+    st.info(f"**Rowdy says:** {st.session_state.assistant_msg or 'Ready when you are!'}")
 
 else:
     st.warning("Time’s up or rounds complete.")
